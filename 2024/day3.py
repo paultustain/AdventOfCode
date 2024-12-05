@@ -8,30 +8,33 @@ def find_value(string):
 
 def split(string, on):
     output_list = []
-
     if on:
         str_split = string.split("don't()", 1)
-        output_list.append(str_split[0])
+        output_list.extend(re.findall('mul\(\d{1,3},\d{1,3}\)', str_split[0]))
         if "do()" in str_split[1]:
-            output_list.append(split(str_split[1], False))
+            output_list.extend(split(str_split[1], False))
         else:
-            return output_list
+            output_list.extend(str_split[1])
+        return output_list
     else:
         str_split = string.split("do()", 1)
+        print(str_split)
         if "don't()" in str_split[1]:
-            output_list.append(split(str_split[1], True))
+            output_list.extend(split(str_split[1], True))
         else:
-            return output_list
+            # Final block
+            output_list.extend(re.findall('mul\(\d{1,3},\d{1,3}\)', str_split[1]))
+        return output_list
     
 
 
-
 with open('input_day3.txt', 'r') as f:
-    # input_string = f.read()
-    input_string = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+do()mul(32,64)don't().(mul(11,8)undo()?mul(8,5))" 
+    input_string = f.read()
+    # input_string = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))" 
 
 # part 1 
 # values = re.findall('mul\(\d{1,3},\d{1,3}\)', input_string)
 
-print(split(input_string, True))
+# print(split(input_string, True))
 
+print(sum([find_value(s) for s in split(input_string, True)]))
