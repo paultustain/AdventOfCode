@@ -1,4 +1,6 @@
 from enum import Enum 
+from copy import deepcopy 
+
 
 class Direction(Enum):
     UP = "up"
@@ -36,17 +38,41 @@ class Grid():
 
 class Guard():
     def __init__(self, x, y, direction):
+        self.initial_x = x
+        self.initial_y = y
         self.x = x
         self.y = y
         self.direction = direction
         self.inside_grid = True 
+        self.is_looping = False
+        self.visited = []
+
+    def reset(self):
+        self.x = self.initial_x
+        self.y = self.initial_y
+        self.inside_grid = True
+        self.is_looping = False
+        self.direction = Direction.UP
+        self.visited = []
+
+
+    def is_loop(self):
+        return (self.x, self.y, self.direction) in self.visited
+
 
     def take_steps(self, dx, dy, grid):
         moving = True 
-        
+
         while moving:
             # print(grid)
             grid.mark_cell(self.x, self.y)
+            
+            if self.is_loop():
+                print("Looping")
+                moving = False
+                self.is_looping = True
+
+            self.visited.append((self.x, self.y, self.direction))
             if self.x == 0 or self.y == 0 or self.x == grid.width - 1 or self.y == grid.height - 1:
                 moving = False 
                 self.inside_grid = False 
@@ -74,6 +100,7 @@ class Guard():
             self.take_steps(-1, 0, grid)
             self.direction = Direction.UP
 
+
 def find_location(grid):
     for i, r in enumerate(grid):
         if '^' in r:
@@ -88,12 +115,47 @@ with open('input_day6.txt', 'r') as f:
 x, y = find_location(input_grid)
 guard = Guard(x, y, Direction.UP)
 
-grid_map = Grid(len(input_grid), len(input_grid[0]))
-for i, r in enumerate(input_grid):
-    for j, c in enumerate(r):
-        grid_map.mark_cell(j, i, c)
+def make_grid():
+    grid_map = Grid(len(input_grid), len(input_grid[0]))
+    # clean_grid_map = Grid(len(input_grid), len(input_grid[0]))
+
+    for i, r in enumerate(input_grid):
+        for j, c in enumerate(r):
+            grid_map.mark_cell(j, i, c)
+            # clean_grid_map.mark_cell(j, i, c)
+    return grid_map
+grid_map = make_grid()
 
 while guard.inside_grid:
     guard.move(grid_map)
 
-print(grid_map.count_type())
+possible_locations = []
+for y in range(grid_map.width):
+    for x in range(grid_map.height):
+        if grid_map.find_items(x, y) == 'X':
+            possible_locations.append((x, y))
+
+# print(clean_grid_map)
+loops = 0
+guard.reset()
+
+for location in possible_locations:
+    guard.reset()
+    curr_grid = make_grid()
+    curr_grid.mark_cell(location[0], location[1], '#')
+    # print(curr_grid)
+    # print(location)
+    
+    # print(guard.inside_grid, not(guard.is_looping))
+    while guard.inside_grid and not(guard.is_looping):
+        guard.move(curr_grid)
+    # print(curr_grid)
+    if guard.is_looping:
+        loops += 1
+
+print(loops)
+#     if location != (guard.initial_x, guard.inital_y):
+#         pass
+
+# print(grid_map)
+# print(grid_map.count_type())
