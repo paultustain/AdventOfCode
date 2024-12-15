@@ -139,21 +139,6 @@ KKKKKWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWPWPPPPPEEEEEEEEEEEEEEEEEEECCCCCCCFCCOOOOO
 KKKKWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWPDDPEEEEEEEEEEEEEEEEEEEECCCCCCFCXOOOOOOOOOJJJJLLVLLVVLVLLLVVVVVMMMMMMMMZZZZZZZEELLLFFFFIIIIIIIIIII
 KKKWWWWWWWWWWWWWWWWWWWXWWWWWWWWWWWWWWWWWWWWWWWWEEEEEEEEEEEEEEEEEEECCCCCCCNOOOOOOOOOOJJJJJLVVVVVVVVVVVVVVVMMMMMMMMMMZZZZEEEEELFFIIIIIIIIIIIII"""
 
-test_farm_map = """RRRRIICCFF
-RRRRIICCCF
-VVRRRCCFFF
-VVRCCCJFFF
-VVVVCJJCFE
-VVIVCCJJEE
-VVIIICJJEE
-MIIIIIJJEE
-MIIISIJEEE
-MMMISSJEEE"""
-
-test_1farm_map = """AAAA
-BBCD
-BBCC
-EEEC"""
 
 class Section():
     def __init__(self):
@@ -173,11 +158,12 @@ class Section():
 
 class Grid():
     def __init__(self, data):
-        self.map = self.grid = [[s for s in r] for r in data.split('\n')]
+        self.map = [[s for s in r] for r in data.split('\n')]
+        # print(self.map)
         self.checked = []
         self.sections = []
-        self._height = len(self.map)-1
-        self._width = len(self.map[0])-1
+        self.height = len(self.map)-1
+        self.width = len(self.map[0])-1
 
     def __repr__(self):
         v = ''
@@ -195,9 +181,9 @@ class Grid():
             return False
         if y == 0 and dy == -1:
             return False
-        if x == self._width and dx == 1:
+        if x == self.width and dx == 1:
             return False
-        if y == self._height and dy == 1:
+        if y == self.height and dy == 1:
             return False
         # if (x+dx, y+dy) in self.checked:
         #     return False 
@@ -206,6 +192,7 @@ class Grid():
         
 
     def find_section_perimeter(self, x, y, section):
+        # print(x, y)
         if (x, y) in self.checked:
             return
         else:
@@ -223,8 +210,8 @@ class Grid():
         
         # self._check_adj(x, y, value)
     def create_section(self):
-        for y in range(self._width+1):
-            for x in range(self._height+1):
+        for y in range(self.width+1):
+            for x in range(self.height+1):
                 if (x, y) not in self.checked:
                     # print(self.map[y][x])
                     section = Section()
@@ -251,8 +238,117 @@ def find_perimeter(section):
 
     return perim
 
+
+def add_coord(line_id, search_dir, value, x, y, dx, dy):
+
+    if search_dir == 'row':
+        if y != line_id:
+            return False
+        if dy == -1:
+            if y == 0: 
+                return True 
+        if dy == 1:
+            if y == grid.height:
+                return True
+    elif search_dir == 'col':
+        if x != line_id:
+            return False
+        if dx == -1:
+            if x == 0: 
+                return True
+        if dx == 1: 
+            if x == grid.width:
+                return True
+    
+    if grid.map[y+dy][x+dx] == value:
+        return False
+    return True
+
+
+def find_top(section, value):
+    count = 0
+    for y in range(grid.height+1):
+        x_values = [s[0] for s in section if add_coord(y, 'row', value, s[0], s[1], 0, -1)]
+        sort_x = sorted(x_values)
+        for i in range(len(sort_x)):
+            if i == 0:
+                count += 1
+            else:
+                if sort_x[i] != sort_x[i-1] + 1:
+                    count += 1
+    
+    # print("top", count)
+    return count
+
+
+    return 1
+
+
+def find_bottom(section, value):
+    count = 0
+    for y in range(grid.height+1):
+        x_values = [s[0] for s in section if add_coord(y, 'row', value, s[0], s[1], 0, 1)]
+        sort_x = sorted(x_values)
+        for i in range(len(sort_x)):
+            if i == 0:
+                count += 1
+            else:
+                if sort_x[i] != sort_x[i-1] + 1:
+                    count += 1
+    
+    # print("bottom", count)
+    return count
+
+
+def find_left(section, value):
+    count = 0
+    for x in range(grid.width+1):
+        y_values = [s[1] for s in section if add_coord(x, 'col', value, s[0], s[1], -1, 0)]
+        sort_y = sorted(y_values)
+        for i in range(len(sort_y)):
+            if i == 0:
+                count += 1
+            else:
+                if sort_y[i] != sort_y[i-1] + 1:
+                    count += 1
+    
+    # print("left", count)
+    return count
+    
+def find_right(section, value):
+    count = 0
+    for x in range(grid.width+1):
+        y_values = [s[1] for s in section if add_coord(x, 'col', value, s[0], s[1], 1, 0)]
+        sort_y = sorted(y_values)
+        for i in range(len(sort_y)):
+            if i == 0:
+                count += 1
+            else:
+                if sort_y[i] != sort_y[i-1] + 1:
+                    count += 1
+    
+    # print("right", count)
+    return count
+
+# day1
+# day1_cost = 0
+# for section in grid.sections:
+#     day1_cost += len(section) * find_perimeter(section)
+
+#day2
 cost = 0
 for section in grid.sections:
-    cost += len(section) * find_perimeter(section)
+    # print(section)
+    lines = 0
+    value = grid.map[section[0][1]][section[0][0]]
+    # print(value)
+    lines += find_top(section, value)
+    lines += find_bottom(section, value)
+    lines += find_left(section, value)
+    lines += find_right(section, value)
+    cost += lines * len(section)
+    # print("sides :", cost)
 
-print(cost)
+print(cost)        
+
+# print(day1_cost)
