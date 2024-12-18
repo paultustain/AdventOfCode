@@ -105,7 +105,7 @@ grid.robots = robots
 grid.add_robots()
 
 i = 1
-RUN_LIMIT = 100
+RUN_LIMIT = 1000000
 while True:
     grid.update_robots(1)
     if check_tree(grid):
