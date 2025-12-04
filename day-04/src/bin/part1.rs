@@ -42,15 +42,6 @@ fn find_surrounding(position: Position, map_size: &MapSize, rows: &Vec<&str>) ->
     for x in start_row..=end_row {
         for y in start_col..=end_col {
             if !(x == 0 && y == 0) {
-                /*
-                dbg!(x);
-                dbg!(y);
-                dbg!(&position);
-                dbg!(
-                    rows[(position.row as i32 + x) as usize]
-                        .chars()
-                        .nth((position.col as i32 + y) as usize)
-                );*/
                 if rows[(position.row as i32 + x) as usize]
                     .chars()
                     .nth((position.col as i32 + y) as usize)
