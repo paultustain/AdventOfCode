@@ -37,7 +37,7 @@ fn find_output(input: &str) -> String {
     count.to_string()
 }
 
-#[cfg(test)]
+s#[cfg(test)]
 mod tests {
     use super::*;
 
