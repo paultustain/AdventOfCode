@@ -11,16 +11,9 @@ struct Position {
 }
 
 #[derive(Debug)]
-enum Direction {
-    Vertical,
-    Horizontal,
-}
-
-#[derive(Debug)]
 struct Edge {
     start: Position,
     end: Position,
-    direction: Direction,
 }
 
 impl Position {
@@ -32,24 +25,14 @@ impl Position {
 fn get_edges(points: &Vec<Position>) -> Vec<Edge> {
     let mut edges: Vec<Edge> = Vec::new();
     for idx in 0..points.len() - 1 {
-        let mut dir = Direction::Horizontal;
-        if &points[idx].x == &points[idx + 1].x {
-            dir = Direction::Vertical;
-        }
         edges.push(Edge {
             start: points[idx],
             end: points[idx + 1],
-            direction: dir,
         })
-    }
-    let mut dir = Direction::Horizontal;
-    if &points[points.len() - 1].x == &points[0].x {
-        dir = Direction::Vertical;
     }
     edges.push(Edge {
         start: points[points.len() - 1],
         end: points[0],
-        direction: dir,
     });
     edges
 }
@@ -88,16 +71,17 @@ fn square_contained(square: &Vec<Position>, green_edge: &Vec<Edge>) -> bool {
     if y_coord.len() == 1 {
         return true;
     }
+    let mut result = true;
     for line in green_edge {
         let left = square[0].x.max(square[1].x) <= line.start.x.min(line.end.x);
         let right = square[0].x.min(square[1].x) >= line.start.x.max(line.end.x);
         let above = square[0].y.max(square[1].y) <= line.start.y.min(line.end.y);
         let below = square[0].y.min(square[1].y) >= line.start.y.max(line.end.y);
 
-        return left || right || above || below;
+        result = left || right || above || below;
     }
 
-    true
+    result
 }
 
 fn find_output(input: &str) -> String {
